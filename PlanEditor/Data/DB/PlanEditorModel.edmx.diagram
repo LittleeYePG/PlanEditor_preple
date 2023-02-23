@@ -19,6 +19,7 @@
         <EntityTypeShape EntityType="PlanEditModel.prgproductionorder" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="PlanEditModel.prgproductionresult" Width="1.5" PointX="4.75" PointY="12.75" IsExpanded="true" />
         <EntityTypeShape EntityType="PlanEditModel.prgDownTimeDetail" Width="1.5" PointX="0.75" PointY="13.75" />
+        <EntityTypeShape EntityType="PlanEditModel.mstLine_WorkTime" Width="1.5" PointX="13.375" PointY="10.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -24,11 +24,13 @@ namespace PlanEditor.Funcion
                               where lType.Contains(t2.ItemType)
                               select new Data.cMRPCapacity
                               {
-                                  LineCode = t2.DefaultLineCode.ToString(),
+                                  LineCode = t2.Default_LineCode.ToString(),
                                   TimeWork = (double)(db.mstitemcapacities
                                             .Where(w => w.ItemCode == t1.ItemCode &&
                                             w.TypeCode == t1.TypeCode &&
-                                            w.LineCode == t2.DefaultLineCode.ToString()).Select(s => (decimal?)s.WorkingTime).FirstOrDefault() ?? (decimal)0.00),
+                                            w.LineCode == t2.Default_LineCode.ToString())
+                                            .Select(s => (decimal?)s.WorkingTime)
+                                            .FirstOrDefault() ?? (decimal)0.00),
                                   MDate = (DateTime)t1.MDate,
                                   ItemCode = t1.ItemCode,
                                   ItemName = t2.ItemName,
@@ -77,6 +79,7 @@ namespace PlanEditor.Funcion
                           //t1.MDate_Ref,
                           t1.ResourceID,
                           t1.LabelID,
+
                       } into g
                       select new Data.cMRPCapacity
                       {
@@ -85,7 +88,7 @@ namespace PlanEditor.Funcion
                           MDate = g.Key.MDate,
                           ResourceID = g.Key.ResourceID,
                           MRPWorkTime = g.Sum(x => x.t1.TotalWorkTime),
-                          MRPCapacity = (g.Sum(x => x.t1.TotalWorkTime) * 100) / (decimal)clsCFunction.GetWorkHours(g.Key.MDate),
+                          MRPCapacity = (g.Sum(x => x.t1.TotalWorkTime) * 100) / (decimal)clsCFunction.GetmstWorkTime_Minutes(g.Key.MDate,g.Key.LineCode),
                       }
                          ).ToList();
             return aa;
@@ -108,15 +111,17 @@ namespace PlanEditor.Funcion
                     XtraMessageBox.Show(txt, "Warning", MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return cs;
                 }
-                
+
                 #region Round 3 หาวันก่อนหน้า ที่อยู่ใน line ของมันเอง - 7 วัน
                 //for (int i = 0;i< 7; i++)
                 //{
                 //    mRPCapacities = calLoop(mRPCapacities, resources, i);
                 //}
 
+                //mRPCapacities = calLoop(mRPCapacities, resources, 0);
+
                 int i = 0;
-                while (mRPCapacities.Where(w=>w.RemainCalQty > 0).ToList().Count() > 0)
+                while (mRPCapacities.Where(w => w.RemainCalQty > 0).ToList().Count() > 0)
                 {
                     mRPCapacities = calLoop(mRPCapacities, resources, i);
                     i++;
@@ -132,79 +137,136 @@ namespace PlanEditor.Funcion
             using (Data.DB.PlanEditorEntities db = new Data.DB.PlanEditorEntities())
             {
                 dayDiff = dayDiff * -1;
-                decimal FreeTime = clsCFunction.WorkHours;
+                double FreeTime = 0;
                 decimal Qty = 0;
+                List<Data.DB.mstLine_WorkTime> WorkTimeofDay = new List<Data.DB.mstLine_WorkTime>();
                 #region Round 1 หาในวันปัจจุบันและใน line ของตัวมันเอง
                 foreach (var c in mRPCapacities.Where(w=>w.RemainCalQty > 0).OrderBy(o => o.LineCode).OrderBy(o1 => o1.MDate))
                 {
                     DateTime MDate = c.MDate.AddDays(dayDiff);
                     Qty = c.RemainCalQty;
                     if (c.TimeWork == 0) continue;
-                    //while (Qty > 0)
+                    
+                    //หาเวลาทำงาน
+                    FreeTime = clsCFunction.GetmstWorkTime_Minutes(MDate,c.LineCode);
+                    WorkTimeofDay = clsCFunction.GetWorkTimeofDay(MDate,c.LineCode);
+
+                    foreach (var _work in WorkTimeofDay.OrderBy(o=>o.StartTime)) //วนตามช่วงเวลาทำงาน
+                    {
+                        if (Qty == 0) continue;
+
+                        double _loopTime = ((TimeSpan)_work.EndTime - (TimeSpan)_work.StartTime).TotalMinutes;
+                        // หาว่า เหลือเวลาทำงานหรือไม่
+                        double TotalTime = 0;
+                        double en = (double)cs.Where(w => w.LineCode == c.LineCode && 
+                            w.MDate == MDate && 
+                            w.StartPlanDate.TimeOfDay >= _work.StartTime &&
+                            w.StartPlanDate.TimeOfDay <= _work.EndTime)
+                            .Select(s => s.TotalWorkTime).DefaultIfEmpty(0).Sum();
+
+                        _loopTime -= en;
+
+                        if (_loopTime > 0)
+                        {
+                            Data.cMRPCapacity cMRP = new Data.cMRPCapacity();
+                            cMRP.ItemCode = c.ItemCode;
+                            cMRP.TypeCode = c.TypeCode;
+                            cMRP.OrderProdNo = c.OrderProdNo;
+                            cMRP.TimeWork = c.TimeWork;
+                            cMRP.LabelID = 2;
+                            cMRP.MDate_Ref = c.MDate;
+                            cMRP.LineCode = c.LineCode;
+                            cMRP.ItemName = c.ItemName;
+
+                            var cQty = (decimal)(_loopTime / c.TimeWork);
+                            if (cQty >= Qty)
+                            {
+                                cMRP.PlanQty = Qty;
+                            }
+                            else
+                            {
+                                cMRP.PlanQty = cQty;
+                            }
+
+                            //กำหนดวันที่ใช้งาน
+                            cMRP.MDate = MDate;
+                            //กำหนดเวลาเริ่มทำงาน
+                            cMRP.StartPlanDate = MDate.AddMinutes(((TimeSpan)_work.StartTime).TotalMinutes);
+                            //บวกเวลา ที่ใช้งานก่อนหน้า
+                            cMRP.StartPlanDate = cMRP.StartPlanDate.AddMinutes((double)TotalTime);
+                            //บวกเวลาทำงานรอบปัจจุบัน เพื่อหา End
+                            cMRP.EndPlanDate = cMRP.StartPlanDate.AddMinutes((double)cMRP.PlanQty * (double)cMRP.TimeWork);
+                            cMRP.MRPCapacity = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                            cMRP.TotalWorkTime = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                            var id = resources.Where(w => w.Code == c.LineCode + "CRP").FirstOrDefault();
+                            if (id != null)
+                            {
+                                cMRP.ResourceID = id.Id;
+                            }
+                            else
+                            {
+                                cMRP.ResourceID = 0;
+                            }
+
+                            if (dayDiff * -1 > 0)
+                            {
+                                cMRP.Remark = string.Format(@"Ref. {0} Line {1} Round {2}", 
+                                    c.MDate.ToString("dd/MM/yyyy"), 
+                                    lineDB.getLineName(c.LineCode), 
+                                    dayDiff * -1);
+                            }
+
+                            Qty -= cMRP.PlanQty;
+                            cs.Add(cMRP);
+                            c.RemainCalQty = Qty;
+                        }
+                    }
+
+
+                    
+
+
+                    
+
+                    //if (FreeTime > 0)
                     //{
-                    FreeTime = clsCFunction.GetWorkHours(MDate);
-                    Data.cMRPCapacity cMRP = new Data.cMRPCapacity();
-                    cMRP.ItemCode = c.ItemCode;
-                    cMRP.TypeCode = c.TypeCode;
-                    cMRP.OrderProdNo = c.OrderProdNo;
-                    cMRP.TimeWork = c.TimeWork;
-                    cMRP.LabelID = 2;
-                    cMRP.MDate_Ref = c.MDate;
-                    cMRP.LineCode = c.LineCode;
-                    cMRP.ItemName = c.ItemName;
-                    //if (c.ItemCode == "00TSBB0086802" || c.ItemCode == "00TSBB0088802_M1")
-                    //{
-                    //    cMRP.LabelID = 2;
+                    //    var cQty = (FreeTime / c.TimeWork);
+                    //    if (cQty >= Qty)
+                    //    {
+                    //        cMRP.PlanQty = Qty;
+                    //    }
+                    //    else
+                    //    {
+                    //        cMRP.PlanQty = cQty;
+                    //    }
+
+
+                    //    //cMRP.PlanQty = Qty - (FreeTime / (decimal)c.TimeWork);
+                    //    cMRP.MDate = MDate;
+                    //    cMRP.StartPlanDate = MDate.AddMinutes(clsCFunction.GetMinutes(clsCFunction.StartTime));
+                    //    cMRP.StartPlanDate = cMRP.StartPlanDate.AddMinutes((double)TotalTime);
+                    //    cMRP.EndPlanDate = cMRP.StartPlanDate.AddMinutes((double)cMRP.PlanQty * (double)cMRP.TimeWork);
+                    //    cMRP.MRPCapacity = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                    //    cMRP.TotalWorkTime = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                    //    var id = resources.Where(w => w.Code == c.LineCode + "CRP").FirstOrDefault();
+                    //    if (id != null)
+                    //    {
+                    //        cMRP.ResourceID = id.Id;
+                    //    }
+                    //    else
+                    //    {
+                    //        cMRP.ResourceID = 0;
+                    //    }
+
+                    //    if (dayDiff*-1 > 0)
+                    //    {
+                    //        cMRP.Remark = string.Format(@"Ref. {0} Line {1} Round {2}", c.MDate.ToString("dd/MM/yyyy"), lineDB.getLineName(Convert.ToInt32(c.LineCode)), dayDiff * -1);
+                    //    }
+
+                    //    Qty -= cMRP.PlanQty;
+                    //    cs.Add(cMRP);
+                    //    c.RemainCalQty = Qty;
                     //}
-
-                    //หาว่ามีรายดารนี้ หรือยัง
-                    decimal TotalTime = 0;
-                    var en = cs.Where(w => w.LineCode == c.LineCode && w.MDate == MDate).Sum(s => s.TotalWorkTime);
-                    if (en != null)
-                    {
-                        FreeTime -= en;
-                        TotalTime = en;
-                    }
-
-                    if (FreeTime > 0)
-                    {
-                        var cQty = (FreeTime / (decimal)c.TimeWork);
-                        if (cQty >= Qty)
-                        {
-                            cMRP.PlanQty = Qty;
-                        }
-                        else
-                        {
-                            cMRP.PlanQty = cQty;
-                        }
-
-
-                        //cMRP.PlanQty = Qty - (FreeTime / (decimal)c.TimeWork);
-                        cMRP.MDate = MDate;
-                        cMRP.StartPlanDate = MDate.AddMinutes(clsCFunction.GetMinutes(clsCFunction.StartTime));
-                        cMRP.StartPlanDate = cMRP.StartPlanDate.AddMinutes((double)TotalTime);
-                        cMRP.EndPlanDate = cMRP.StartPlanDate.AddMinutes((double)cMRP.PlanQty * (double)cMRP.TimeWork);
-                        cMRP.MRPCapacity = cMRP.PlanQty * (decimal)cMRP.TimeWork;
-                        cMRP.TotalWorkTime = cMRP.PlanQty * (decimal)cMRP.TimeWork;
-                        var id = resources.Where(w => w.Code == c.LineCode + "CRP").FirstOrDefault();
-                        if (id != null)
-                        {
-                            cMRP.ResourceID = id.Id;
-                        }
-                        else
-                        {
-                            cMRP.ResourceID = 0;
-                        }
-
-                        if (dayDiff*-1 > 0)
-                        {
-                            cMRP.Remark = string.Format(@"Ref. {0} Line {1} Round {2}", c.MDate.ToString("dd/MM/yyyy"), lineDB.getLineName(Convert.ToInt32(c.LineCode)), dayDiff * -1);
-                        }
-
-                        Qty -= cMRP.PlanQty;
-                        cs.Add(cMRP);
-                        c.RemainCalQty = Qty;
-                    }
 
                     //    Qty = 0;
                     //}
@@ -216,64 +278,82 @@ namespace PlanEditor.Funcion
                     DateTime MDate = c.MDate.AddDays(dayDiff);
                     Qty = c.RemainCalQty;
                     if (c.TimeWork == 0) continue;
-                    //while (Qty > 0)
-                    //{
-                    FreeTime = clsCFunction.GetWorkHours(MDate);
-
+                    //วนหา line code ถัดไป
                     foreach (var l in lineDB.GetMstitemcapacities(c.ItemCode, c.TypeCode, c.LineCode))
                     {
                         if (Qty == 0) continue;
-                        //หาว่ามีรายดารนี้ หรือยัง
-                        decimal TotalTime = 0;
-                        var en = cs.Where(w => w.LineCode == l.LineCode && w.MDate == MDate).Sum(s => s.TotalWorkTime);
-                        if (en != null)
+                        //หาเวลาทำงาน
+                        FreeTime = clsCFunction.GetmstWorkTime_Minutes(MDate, l.LineCode);
+                        WorkTimeofDay = clsCFunction.GetWorkTimeofDay(MDate, l.LineCode);
+
+                        foreach (var _work in WorkTimeofDay.OrderBy(o => o.StartTime)) //วนตามช่วงเวลาทำงาน
                         {
-                            FreeTime -= en;
-                            TotalTime = en;
-                        }
-
-                        if (FreeTime > 0)
-                        {
-                            Data.cMRPCapacity cMRP = new Data.cMRPCapacity();
-                            cMRP.ItemCode = c.ItemCode;
-                            cMRP.TypeCode = c.TypeCode;
-                            cMRP.OrderProdNo = c.OrderProdNo;
-                            cMRP.TimeWork = (double)l.WorkingTime;
-                            cMRP.LabelID = 2;
-                            cMRP.MDate_Ref = c.MDate;
-                            cMRP.LineCode = l.LineCode;
-                            cMRP.ItemName = c.ItemName;
-                            var cQty = (FreeTime / (decimal)l.WorkingTime);
-                            if (cQty >= Qty)
+                            if (Qty == 0) continue;
+                            double _loopTime = ((TimeSpan)_work.EndTime - (TimeSpan)_work.StartTime).TotalMinutes;
+                            // หาว่า เหลือเวลาทำงานหรือไม่
+                            double TotalTime = 0;
+                            double en = (double)cs.Where(w => w.LineCode == l.LineCode &&
+                                w.MDate == MDate &&
+                                w.StartPlanDate.TimeOfDay >= _work.StartTime &&
+                                w.StartPlanDate.TimeOfDay <= _work.EndTime)
+                                .Select(s => s.TotalWorkTime).DefaultIfEmpty(0).Sum();
+                            _loopTime -= en;
+                            if (_loopTime > 0)
                             {
-                                cMRP.PlanQty = Qty;
-                            }
-                            else
-                            {
-                                cMRP.PlanQty = cQty;
+                                Data.cMRPCapacity cMRP = new Data.cMRPCapacity();
+                                cMRP.ItemCode = c.ItemCode;
+                                cMRP.TypeCode = c.TypeCode;
+                                cMRP.OrderProdNo = c.OrderProdNo;
+                                cMRP.TimeWork = c.TimeWork;
+                                cMRP.LabelID = 2;
+                                cMRP.MDate_Ref = c.MDate;
+                                cMRP.LineCode = l.LineCode;
+                                cMRP.ItemName = c.ItemName;
+
+                                var cQty = (decimal)(_loopTime / c.TimeWork);
+                                if (cQty >= Qty)
+                                {
+                                    cMRP.PlanQty = Qty;
+                                }
+                                else
+                                {
+                                    cMRP.PlanQty = cQty;
+                                }
+
+                                //กำหนดวันที่ใช้งาน
+                                cMRP.MDate = MDate;
+                                //กำหนดเวลาเริ่มทำงาน
+                                cMRP.StartPlanDate = MDate.AddMinutes(((TimeSpan)_work.StartTime).TotalMinutes);
+                                //บวกเวลา ที่ใช้งานก่อนหน้า
+                                cMRP.StartPlanDate = cMRP.StartPlanDate.AddMinutes((double)TotalTime);
+                                //บวกเวลาทำงานรอบปัจจุบัน เพื่อหา End
+                                cMRP.EndPlanDate = cMRP.StartPlanDate.AddMinutes((double)cMRP.PlanQty * (double)cMRP.TimeWork);
+                                cMRP.MRPCapacity = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                                cMRP.TotalWorkTime = cMRP.PlanQty * (decimal)cMRP.TimeWork;
+                                var id = resources.Where(w => w.Code == l.LineCode + "CRP").FirstOrDefault();
+                                if (id != null)
+                                {
+                                    cMRP.ResourceID = id.Id;
+                                }
+                                else
+                                {
+                                    cMRP.ResourceID = 0;
+                                }
+
+                                if (dayDiff * -1 > 0)
+                                {
+                                    cMRP.Remark = string.Format(@"Ref. {0} Line {1} Round {2}"
+                                                    , c.MDate.ToString("dd/MM/yyyy")
+                                                    , lineDB.getLineName(c.LineCode)
+                                                    , dayDiff * -1);
+                                }
+
+                                Qty -= cMRP.PlanQty;
+                                cs.Add(cMRP);
+                                c.RemainCalQty = Qty;
                             }
 
-                            cMRP.MDate = MDate;
-                            cMRP.StartPlanDate = MDate.AddMinutes(clsCFunction.GetMinutes(clsCFunction.StartTime));
-                            cMRP.StartPlanDate = cMRP.StartPlanDate.AddMinutes((double)TotalTime);
-                            cMRP.EndPlanDate = cMRP.StartPlanDate.AddMinutes((double)cMRP.PlanQty * (double)cMRP.TimeWork);
-                            cMRP.MRPCapacity = cMRP.PlanQty * (decimal)cMRP.TimeWork;
-                            cMRP.TotalWorkTime = cMRP.PlanQty * (decimal)cMRP.TimeWork;
-                            var id = resources.Where(w => w.Code == l.LineCode + "CRP").FirstOrDefault();
-                            if (id != null)
-                            {
-                                cMRP.ResourceID = id.Id;
-                            }
-                            else
-                            {
-                                cMRP.ResourceID = 0;
-                            }
 
-                            cMRP.Remark = string.Format(@"Ref. {0} Line {1} Round {2}", c.MDate.ToString("dd/MM/yyyy"), lineDB.getLineName(Convert.ToInt32(c.LineCode)),dayDiff*-1);
-
-                            Qty -= cMRP.PlanQty;
-                            cs.Add(cMRP);
-                            c.RemainCalQty = Qty;
                         }
                     }
 

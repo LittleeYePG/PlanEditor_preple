@@ -25,7 +25,12 @@ namespace PlanEditor
             lblLine.Text = resources.Where(w => w.Id == Convert.ToInt32(eventArgs.FlyoutData.Appointment.ResourceId)).Select(s => s.LineName).FirstOrDefault();
             lblPlanDate.Text = eventArgs.FlyoutData.Start.ToString("dd/MM/yyyy");
 
-            var DaysTime = Funcion.clsCFunction.GetWorkHours(eventArgs.FlyoutData.Start.Date);
+            //var DaysTime = Funcion.clsCFunction.GetWorkHours(eventArgs.FlyoutData.Start.Date);
+
+            var DaysTime = Funcion.clsCFunction.GetmstWorkTime_Minutes(
+                eventArgs.FlyoutData.Start.Date,
+                resources.Where(w => w.Id == Convert.ToInt32(eventArgs.FlyoutData.Appointment.ResourceId)).Select(s => s.LineCode).FirstOrDefault()
+                );
 
             var Capacity = DataList.Where(w => w.ResourceID == Convert.ToInt32(eventArgs.FlyoutData.Appointment.ResourceId) && w.MDate.Equals(eventArgs.FlyoutData.Start)).Sum(s => s.TotalWorkTime);
             lblWorktime.Text = Capacity.ToString("#,##0") + " / " + DaysTime.ToString("#,##0");

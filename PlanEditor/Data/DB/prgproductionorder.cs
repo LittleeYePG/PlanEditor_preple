@@ -52,5 +52,7 @@ namespace PlanEditor.Data.DB
         public string ResultStartTime { get; set; }
         public Nullable<int> CntBoxNo { get; set; }
         public Nullable<int> ResultSeqNo { get; set; }
+        public Nullable<decimal> ResvQty { get; set; }
+        public Nullable<decimal> AbleQty { get; set; }
     }
 }

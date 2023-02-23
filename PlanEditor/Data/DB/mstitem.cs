@@ -64,5 +64,6 @@ namespace PlanEditor.Data.DB
         public string MCNo { get; set; }
         public string WireColor { get; set; }
         public Nullable<decimal> Length { get; set; }
+        public string Default_LineCode { get; set; }
     }
 }

@@ -39,5 +39,6 @@ namespace PlanEditor.Data.DB
         public virtual DbSet<prgproductionorder> prgproductionorders { get; set; }
         public virtual DbSet<prgproductionresult> prgproductionresults { get; set; }
         public virtual DbSet<prgDownTimeDetail> prgDownTimeDetails { get; set; }
+        public virtual DbSet<mstLine_WorkTime> mstLine_WorkTime { get; set; }
     }
 }

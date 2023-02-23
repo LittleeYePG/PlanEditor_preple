@@ -22,13 +22,20 @@ namespace PlanEditor
         public override bool IsDateVisible(DateTime date)
         {
             int ot = 0;
-            TimeSpan Start = Funcion.clsCFunction.StartTime;
-            TimeSpan End = Funcion.clsCFunction.EndTime;
+            if (date.Date == DateTime.Today && date.Hour == 18)
+            {
+                ot = 0;
+            }
 
-            if (date.Date.Equals(DateTime.Today))
-                End += TimeSpan.FromMinutes((double)Funcion.clsCFunction.GetOT);
+            TimeSpan Start = Funcion.clsCFunction.OTDB.GetMinTime(date); //Funcion.clsCFunction.StartTime;
+            //if (Funcion.clsCFunction.StartTime < Start)
+            //    Start = Funcion.clsCFunction.StartTime;
 
+            TimeSpan End = Funcion.clsCFunction.OTDB.GetMaxTime(date);
+            //if (End < Funcion.clsCFunction.EndTime)
+            //    End = Funcion.clsCFunction.EndTime;
 
+            
             if (date.Hour >= Start.Hours && date.Hour <= End.Hours)
                 return true;// !(date.Hour == 14);
             else return false;

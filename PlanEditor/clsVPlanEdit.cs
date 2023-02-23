@@ -88,8 +88,8 @@ namespace PlanEditor
 
             //schedulerControl.LimitInterval.Start = dtpDateFr;
             //schedulerControl.LimitInterval.End = dtpDateTo;
-            schedulerControl.GanttView.WorkTime.Start = Funcion.clsCFunction.StartTime;
-            schedulerControl.GanttView.WorkTime.End = Funcion.clsCFunction.EndTime;
+            schedulerControl.GanttView.WorkTime.Start = Funcion.clsCFunction.GetStartTime;
+            schedulerControl.GanttView.WorkTime.End = Funcion.clsCFunction.GetEndTime;
 
             schedulerControl.OptionsCustomization.AllowAppointmentMultiSelect = false;
             schedulerControl.GanttView.ShowResourceHeaders = false;
@@ -137,7 +137,9 @@ namespace PlanEditor
                     var sv = schedulerControl.Views.GanttView.Scales.Where(w => w.DisplayName == s.DisplayName).FirstOrDefault();
                     sv.Enabled = false;
                 }
-            }            
+            }
+
+            
 
             schedulerControl.AppointmentDrop += SchedulerControl_AppointmentDrop;
             schedulerControl.AppointmentFlyoutShowing += SchedulerControl_AppointmentFlyoutShowing;
@@ -159,24 +161,41 @@ namespace PlanEditor
             schedulerControl.CustomDrawTimeCell += (sender, e) =>
             {
                 SelectableIntervalViewInfo cell = e.ObjectInfo as SelectableIntervalViewInfo;
-                TimeSpan startWorkHours = schedulerControl.GanttView.WorkTime.Start;
-                TimeSpan endWorkHours = schedulerControl.GanttView.WorkTime.End;
-                TimeSpan endWorkHoursOT = schedulerControl.GanttView.WorkTime.End;
+                TimeSpan startWorkHours = Funcion.clsCFunction.OTDB.GetMinTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])); //schedulerControl.GanttView.WorkTime.Start;
+                TimeSpan endWorkHours = Funcion.clsCFunction.OTDB.GetMaxTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])); ;
+                //TimeSpan endWorkHoursOT = schedulerControl.GanttView.WorkTime.End;
 
-                if (cell.Interval.End.Date.Equals(DateTime.Today))
-                    endWorkHoursOT += TimeSpan.FromMinutes((double)Funcion.clsCFunction.GetOT);
+                //if (cell.Interval.End.Date.Equals(DateTime.Today))
+                //endWorkHoursOT += TimeSpan.FromMinutes((double)Funcion.clsCFunction.GetOT);
 
+                //if (cell.Interval.Start.TimeOfDay.Hours == 18)
+                //{
+                //    startWorkHours = startWorkHours;
+                //}
+                var LineCode = mstLineDB.getLineCode(Convert.ToInt32(cell.Resource.CustomFields["ID"]), resources);
                 Rectangle rec = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-                using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Color.DimGray, Color.Azure))
+                using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Color.White, Funcion.FColor.StopTimeOT))
                 {
-                    if ((cell.Interval.Start.TimeOfDay < startWorkHours || cell.Interval.End.TimeOfDay > endWorkHoursOT) || cell.Interval.End.TimeOfDay.Hours == 0)
-                    {
+                    //if ((cell.Interval.Start.TimeOfDay < startWorkHours || cell.Interval.End.TimeOfDay > endWorkHours) || cell.Interval.End.TimeOfDay.Hours == 0)
+                    //{
 
+                    //    e.Cache.FillRectangle(hatchBrush, rec);
+                    //}
+                    if (!Funcion.clsCFunction.checkWorkTime(cell.Interval.Start, LineCode))
+                    {
                         e.Cache.FillRectangle(hatchBrush, rec);
                     }
-                    else if (cell.Interval.End.TimeOfDay > endWorkHours)
+                    else if (Funcion.clsCFunction.OTDB.checkTimeOT(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
                     {
-                        e.Cache.FillRectangle(ColorTranslator.FromHtml("#FF0000"), rec);
+                        e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
+                    }
+                    else if (Funcion.clsCFunction.OTDB.checkStopTime(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+                    {
+                        using (var hatchBrush1 = new HatchBrush(HatchStyle.DiagonalCross, Color.White, Funcion.FColor.StopTime))
+                        {
+                            e.Cache.FillRectangle(hatchBrush1, rec);
+                        }
+                            //e.Cache.FillRectangle(ColorTranslator.FromHtml("#FADBD8"), rec);
                     }
                     else
                     {
@@ -780,26 +799,28 @@ namespace PlanEditor
         }
         private void PrepareResourceStorage(ISchedulerStorage storage, bool hideParentResource)
         {
-            ResourceMappingInfo mappings = storage.Resources.Mappings;
-            mappings.Id = "Id";
-            mappings.Caption = "Caption";
-            mappings.ParentId = "ParentId";
-            //mappings.Color = "Color";
-            storage.Resources.DataSource = this.resources;
-            if (hideParentResource)
-            {
-                foreach (Resource resource in storage.Resources.Items)
-                {
-                    if (resource.ParentId.Equals(resource.Id))
-                        continue;
-                    storage.Resources.GetResourceById(resource.ParentId).Visible = false;
-                }
-            }
-            //foreach (var r in resources)
+            //ResourceMappingInfo mappings = storage.Resources.Mappings;
+            //mappings.Id = "Id";
+            //mappings.Caption = "Caption";
+            //mappings.ParentId = "ParentId";            
+            ////mappings.Color = "Color";
+            //storage.Resources.DataSource = this.resources;
+            //if (hideParentResource)
             //{
-            //    schedulerControl.DataStorage.Resources.Add(schedulerControl.DataStorage.CreateResource(r.Id));
-            //    schedulerControl.DataStorage.Resources.GetResourceById(r.Id).Caption = r.Caption;
+            //    foreach (Resource resource in storage.Resources.Items)
+            //    {
+            //        if (resource.ParentId.Equals(resource.Id))
+            //            continue;
+            //        storage.Resources.GetResourceById(resource.ParentId).Visible = false;
+                    
+            //    }
             //}
+            foreach (var r in resources)
+            {
+                schedulerControl.DataStorage.Resources.Add(schedulerControl.DataStorage.CreateResource(r.Id));
+                schedulerControl.DataStorage.Resources.GetResourceById(r.Id).Caption = r.Caption;
+                schedulerControl.DataStorage.Resources.GetResourceById(r.Id).CustomFields["ID"] = r.Id;
+            }
         }
         private void addApp()
         {

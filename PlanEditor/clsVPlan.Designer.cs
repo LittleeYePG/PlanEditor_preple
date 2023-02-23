@@ -31,16 +31,17 @@ namespace PlanEditor
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(clsVPlan));
-            DevExpress.XtraScheduler.TimeRuler timeRuler1 = new DevExpress.XtraScheduler.TimeRuler();
-            DevExpress.XtraScheduler.TimeRuler timeRuler2 = new DevExpress.XtraScheduler.TimeRuler();
-            DevExpress.XtraScheduler.TimeScaleYear timeScaleYear1 = new DevExpress.XtraScheduler.TimeScaleYear();
-            DevExpress.XtraScheduler.TimeScaleQuarter timeScaleQuarter1 = new DevExpress.XtraScheduler.TimeScaleQuarter();
-            DevExpress.XtraScheduler.TimeScaleMonth timeScaleMonth1 = new DevExpress.XtraScheduler.TimeScaleMonth();
-            DevExpress.XtraScheduler.TimeScaleWeek timeScaleWeek1 = new DevExpress.XtraScheduler.TimeScaleWeek();
-            DevExpress.XtraScheduler.TimeScaleDay timeScaleDay1 = new DevExpress.XtraScheduler.TimeScaleDay();
-            DevExpress.XtraScheduler.TimeScaleHour timeScaleHour1 = new DevExpress.XtraScheduler.TimeScaleHour();
-            DevExpress.XtraScheduler.TimeScale15Minutes timeScale15Minutes1 = new DevExpress.XtraScheduler.TimeScale15Minutes();
-            DevExpress.XtraScheduler.TimeRuler timeRuler3 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler4 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler5 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeScaleYear timeScaleYear2 = new DevExpress.XtraScheduler.TimeScaleYear();
+            DevExpress.XtraScheduler.TimeScaleQuarter timeScaleQuarter2 = new DevExpress.XtraScheduler.TimeScaleQuarter();
+            DevExpress.XtraScheduler.TimeScaleMonth timeScaleMonth2 = new DevExpress.XtraScheduler.TimeScaleMonth();
+            DevExpress.XtraScheduler.TimeScaleWeek timeScaleWeek2 = new DevExpress.XtraScheduler.TimeScaleWeek();
+            DevExpress.XtraScheduler.TimeScaleDay timeScaleDay2 = new DevExpress.XtraScheduler.TimeScaleDay();
+            DevExpress.XtraScheduler.TimeScaleHour timeScaleHour2 = new DevExpress.XtraScheduler.TimeScaleHour();
+            DevExpress.XtraScheduler.TimeScale15Minutes timeScale15Minutes2 = new DevExpress.XtraScheduler.TimeScale15Minutes();
+            DevExpress.XtraScheduler.TimeRuler timeRuler6 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager1 = new DevExpress.XtraSplashScreen.SplashScreenManager(this, typeof(global::PlanEditor.SplashScreen1), true, true);
             this.ribbon = new DevExpress.XtraBars.Ribbon.RibbonControl();
             this.btnSearch = new DevExpress.XtraBars.BarButtonItem();
             this.btnDetail = new DevExpress.XtraBars.BarButtonItem();
@@ -53,10 +54,15 @@ namespace PlanEditor
             this.barEditItem1 = new DevExpress.XtraBars.BarEditItem();
             this.repositoryItemHypertextLabel2 = new DevExpress.XtraEditors.Repository.RepositoryItemHypertextLabel();
             this.barVersion = new DevExpress.XtraBars.BarHeaderItem();
+            this.bntSetOT = new DevExpress.XtraBars.BarButtonItem();
+            this.bntSetting = new DevExpress.XtraBars.BarButtonItem();
+            this.btnLineWorkTime = new DevExpress.XtraBars.BarButtonItem();
+            this.btnReLoad = new DevExpress.XtraBars.BarButtonItem();
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup2 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup3 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
+            this.ribbonPageGroup4 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.repositoryItemHypertextLabel1 = new DevExpress.XtraEditors.Repository.RepositoryItemHypertextLabel();
             this.ribbonStatusBar1 = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -130,9 +136,13 @@ namespace PlanEditor
             this.bntInfo,
             this.barButtonGroup1,
             this.barEditItem1,
-            this.barVersion});
+            this.barVersion,
+            this.bntSetOT,
+            this.bntSetting,
+            this.btnLineWorkTime,
+            this.btnReLoad});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 12;
+            this.ribbon.MaxItemId = 16;
             this.ribbon.Name = "ribbon";
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1});
@@ -216,12 +226,44 @@ namespace PlanEditor
             this.barVersion.Id = 11;
             this.barVersion.Name = "barVersion";
             // 
+            // bntSetOT
+            // 
+            this.bntSetOT.Caption = "Set OT";
+            this.bntSetOT.Id = 12;
+            this.bntSetOT.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("bntSetOT.ImageOptions.SvgImage")));
+            this.bntSetOT.Name = "bntSetOT";
+            // 
+            // bntSetting
+            // 
+            this.bntSetting.Caption = "Setting";
+            this.bntSetting.Id = 13;
+            this.bntSetting.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("bntSetting.ImageOptions.SvgImage")));
+            this.bntSetting.Name = "bntSetting";
+            this.bntSetting.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.bntSetting_ItemClick);
+            // 
+            // btnLineWorkTime
+            // 
+            this.btnLineWorkTime.Caption = "Set Line Work Time";
+            this.btnLineWorkTime.Id = 14;
+            this.btnLineWorkTime.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnLineWorkTime.ImageOptions.SvgImage")));
+            this.btnLineWorkTime.Name = "btnLineWorkTime";
+            this.btnLineWorkTime.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnLineWorkTime_ItemClick);
+            // 
+            // btnReLoad
+            // 
+            this.btnReLoad.Caption = "Re Load";
+            this.btnReLoad.Id = 15;
+            this.btnReLoad.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnReLoad.ImageOptions.SvgImage")));
+            this.btnReLoad.Name = "btnReLoad";
+            this.btnReLoad.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnReLoad_ItemClick);
+            // 
             // ribbonPage1
             // 
             this.ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
             this.ribbonPageGroup1,
             this.ribbonPageGroup2,
-            this.ribbonPageGroup3});
+            this.ribbonPageGroup3,
+            this.ribbonPageGroup4});
             this.ribbonPage1.Name = "ribbonPage1";
             this.ribbonPage1.Text = "Home";
             // 
@@ -243,6 +285,14 @@ namespace PlanEditor
             this.ribbonPageGroup3.ItemLinks.Add(this.bntInfo);
             this.ribbonPageGroup3.Name = "ribbonPageGroup3";
             this.ribbonPageGroup3.Text = "View";
+            // 
+            // ribbonPageGroup4
+            // 
+            this.ribbonPageGroup4.ItemLinks.Add(this.bntSetting);
+            this.ribbonPageGroup4.ItemLinks.Add(this.btnLineWorkTime);
+            this.ribbonPageGroup4.ItemLinks.Add(this.btnReLoad);
+            this.ribbonPageGroup4.Name = "ribbonPageGroup4";
+            this.ribbonPageGroup4.Text = "Setting";
             // 
             // repositoryItemHypertextLabel1
             // 
@@ -668,40 +718,44 @@ namespace PlanEditor
             this.schedulerControl.TabIndex = 16;
             this.schedulerControl.Text = "schedulerControl1";
             this.schedulerControl.Views.AgendaView.Enabled = false;
-            this.schedulerControl.Views.DayView.TimeRulers.Add(timeRuler1);
-            this.schedulerControl.Views.FullWeekView.TimeRulers.Add(timeRuler2);
+            this.schedulerControl.Views.DayView.TimeRulers.Add(timeRuler4);
+            this.schedulerControl.Views.FullWeekView.TimeRulers.Add(timeRuler5);
             this.schedulerControl.Views.GanttView.Appearance.Appointment.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.schedulerControl.Views.GanttView.Appearance.Appointment.Options.UseFont = true;
             this.schedulerControl.Views.GanttView.AppointmentDisplayOptions.AppointmentInterspacing = 0;
             this.schedulerControl.Views.GanttView.AppointmentDisplayOptions.AutoAdjustForeColor = DevExpress.XtraScheduler.AdjustColorMode.Enabled;
             this.schedulerControl.Views.GanttView.AppointmentDisplayOptions.ShowReminder = false;
             this.schedulerControl.Views.GanttView.CellsAutoHeightOptions.MinHeight = 20;
-            timeScaleYear1.Enabled = false;
-            timeScaleQuarter1.Enabled = false;
-            timeScaleMonth1.Enabled = false;
-            timeScaleDay1.Width = 100;
-            timeScaleHour1.Enabled = false;
-            timeScale15Minutes1.Enabled = false;
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleYear1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleQuarter1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleMonth1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleWeek1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleDay1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleHour1);
-            this.schedulerControl.Views.GanttView.Scales.Add(timeScale15Minutes1);
+            timeScaleYear2.Enabled = false;
+            timeScaleQuarter2.Enabled = false;
+            timeScaleMonth2.Enabled = false;
+            timeScaleDay2.Width = 100;
+            timeScaleHour2.Enabled = false;
+            timeScale15Minutes2.Enabled = false;
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleYear2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleQuarter2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleMonth2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleWeek2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleDay2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScaleHour2);
+            this.schedulerControl.Views.GanttView.Scales.Add(timeScale15Minutes2);
             this.schedulerControl.Views.GanttView.TimeIndicatorDisplayOptions.ShowOverAppointment = true;
             this.schedulerControl.Views.MonthView.Enabled = false;
             this.schedulerControl.Views.TimelineView.Enabled = false;
             this.schedulerControl.Views.WeekView.AllowScrollAnimation = false;
             this.schedulerControl.Views.WeekView.Enabled = false;
             this.schedulerControl.Views.WorkWeekView.Enabled = false;
-            this.schedulerControl.Views.WorkWeekView.TimeRulers.Add(timeRuler3);
+            this.schedulerControl.Views.WorkWeekView.TimeRulers.Add(timeRuler6);
             // 
             // barHeaderItem1
             // 
             this.barHeaderItem1.Caption = "barHeaderItem1";
             this.barHeaderItem1.Id = 6;
             this.barHeaderItem1.Name = "barHeaderItem1";
+            // 
+            // splashScreenManager1
+            // 
+            splashScreenManager1.ClosingDelay = 500;
             // 
             // clsVPlan
             // 
@@ -802,5 +856,10 @@ namespace PlanEditor
         private DevExpress.XtraEditors.Repository.RepositoryItemHypertextLabel repositoryItemHypertextLabel2;
         private DevExpress.XtraBars.BarHeaderItem barVersion;
         private DevExpress.XtraBars.BarHeaderItem barHeaderItem1;
+        private DevExpress.XtraBars.BarButtonItem bntSetOT;
+        private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup4;
+        private DevExpress.XtraBars.BarButtonItem bntSetting;
+        private DevExpress.XtraBars.BarButtonItem btnLineWorkTime;
+        private DevExpress.XtraBars.BarButtonItem btnReLoad;
     }
 }

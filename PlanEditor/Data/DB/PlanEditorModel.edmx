@@ -146,6 +146,7 @@
           <Property Name="MCNo" Type="varchar" MaxLength="20" />
           <Property Name="WireColor" Type="varchar" MaxLength="20" />
           <Property Name="Length" Type="decimal" Precision="5" Scale="0" />
+          <Property Name="Default_LineCode" Type="nvarchar" MaxLength="20" />
         </EntityType>
         <EntityType Name="mstitemcapacity">
           <Key>
@@ -237,6 +238,23 @@
           <Property Name="DefStaffQtyHD" Type="int" />
           <Property Name="DefStaffQtyHN" Type="int" />
           <Property Name="WorkQty" Type="int" />
+          <Property Name="TargetD" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="TargetN" Type="decimal" Precision="18" Scale="5" />
+        </EntityType>
+        <EntityType Name="mstLine_WorkTime">
+          <Key>
+            <PropertyRef Name="ID" />
+            <PropertyRef Name="LineCode" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LineCode" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="StartTime" Type="time" Precision="7" />
+          <Property Name="EndTime" Type="time" Precision="7" />
+          <Property Name="WorkTime" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="CreateUser" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="UpdateUser" Type="int" Nullable="false" />
+          <Property Name="UpdateDate" Type="datetime" />
         </EntityType>
         <EntityType Name="mstlinecalendar">
           <Key>
@@ -357,6 +375,8 @@
           <Property Name="ResultStartTime" Type="nvarchar" MaxLength="6" />
           <Property Name="CntBoxNo" Type="int" />
           <Property Name="ResultSeqNo" Type="int" />
+          <Property Name="ResvQty" Type="decimal" Precision="18" Scale="5" />
+          <Property Name="AbleQty" Type="decimal" Precision="18" Scale="5" />
         </EntityType>
         <EntityType Name="prgproductionresult">
           <Key>
@@ -410,6 +430,7 @@
           <EntitySet Name="mstitemcapacity" EntityType="Self.mstitemcapacity" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="mstline" EntityType="Self.mstline" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="mstline_Marunix" EntityType="Self.mstline_Marunix" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="mstLine_WorkTime" EntityType="Self.mstLine_WorkTime" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="mstlinecalendar" EntityType="Self.mstlinecalendar" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="prgdmrp" EntityType="Self.prgdmrp" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="prgDownTimeDetail" EntityType="Self.prgDownTimeDetail" Schema="dbo" store:Type="Tables" />
@@ -562,6 +583,7 @@
           <Property Name="MCNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="WireColor" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="Length" Type="Decimal" Precision="5" Scale="0" />
+          <Property Name="Default_LineCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="mstitemcapacity">
           <Key>
@@ -653,6 +675,8 @@
           <Property Name="DefStaffQtyHD" Type="Int32" />
           <Property Name="DefStaffQtyHN" Type="Int32" />
           <Property Name="WorkQty" Type="Int32" />
+          <Property Name="TargetD" Type="Decimal" Precision="18" Scale="5" />
+          <Property Name="TargetN" Type="Decimal" Precision="18" Scale="5" />
         </EntityType>
         <EntityType Name="mstlinecalendar">
           <Key>
@@ -754,6 +778,8 @@
           <Property Name="ResultStartTime" Type="String" MaxLength="6" FixedLength="false" Unicode="true" />
           <Property Name="CntBoxNo" Type="Int32" />
           <Property Name="ResultSeqNo" Type="Int32" />
+          <Property Name="ResvQty" Type="Decimal" Precision="18" Scale="5" />
+          <Property Name="AbleQty" Type="Decimal" Precision="18" Scale="5" />
         </EntityType>
         <EntityType Name="prgproductionresult">
           <Key>
@@ -813,6 +839,7 @@
           <EntitySet Name="prgproductionorders" EntityType="Self.prgproductionorder" />
           <EntitySet Name="prgproductionresults" EntityType="Self.prgproductionresult" />
           <EntitySet Name="prgDownTimeDetails" EntityType="PlanEditModel.prgDownTimeDetail" />
+          <EntitySet Name="mstLine_WorkTime" EntityType="PlanEditModel.mstLine_WorkTime" />
         </EntityContainer>
         <EntityType Name="prgDownTimeDetail">
           <Key>
@@ -832,6 +859,21 @@
           <Property Name="CreateDate" Type="DateTime" Precision="3" />
           <Property Name="UpdateUser" Type="Int32" />
           <Property Name="UpdateDate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="mstLine_WorkTime">
+          <Key>
+            <PropertyRef Name="ID" />
+            <PropertyRef Name="LineCode" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LineCode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="StartTime" Type="Time" Precision="7" />
+          <Property Name="EndTime" Type="Time" Precision="7" />
+          <Property Name="CreateUser" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdateUser" Type="Int32" Nullable="false" />
+          <Property Name="UpdateDate" Type="DateTime" Precision="3" />
+          <Property Name="WorkTime" Type="Decimal" Precision="18" Scale="5" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -931,6 +973,7 @@
           <EntitySetMapping Name="mstitems">
             <EntityTypeMapping TypeName="PlanEditModel.mstitem">
               <MappingFragment StoreEntitySet="mstitem">
+                <ScalarProperty Name="Default_LineCode" ColumnName="Default_LineCode" />
                 <ScalarProperty Name="ItemCode" ColumnName="ItemCode" />
                 <ScalarProperty Name="TypeCode" ColumnName="TypeCode" />
                 <ScalarProperty Name="ItemName" ColumnName="ItemName" />
@@ -1048,6 +1091,8 @@
           <EntitySetMapping Name="mstline_Marunix">
             <EntityTypeMapping TypeName="PlanEditModel.mstline_Marunix">
               <MappingFragment StoreEntitySet="mstline_Marunix">
+                <ScalarProperty Name="TargetN" ColumnName="TargetN" />
+                <ScalarProperty Name="TargetD" ColumnName="TargetD" />
                 <ScalarProperty Name="LineID" ColumnName="LineID" />
                 <ScalarProperty Name="LineName" ColumnName="LineName" />
                 <ScalarProperty Name="ProdID" ColumnName="ProdID" />
@@ -1136,6 +1181,8 @@
           <EntitySetMapping Name="prgproductionorders">
             <EntityTypeMapping TypeName="PlanEditModel.prgproductionorder">
               <MappingFragment StoreEntitySet="prgproductionorder">
+                <ScalarProperty Name="AbleQty" ColumnName="AbleQty" />
+                <ScalarProperty Name="ResvQty" ColumnName="ResvQty" />
                 <ScalarProperty Name="ProductionCode" ColumnName="ProductionCode" />
                 <ScalarProperty Name="DONo" ColumnName="DONo" />
                 <ScalarProperty Name="PlanDate" ColumnName="PlanDate" />
@@ -1234,6 +1281,21 @@
                 <ScalarProperty Name="ProdID" ColumnName="ProdID" />
                 <ScalarProperty Name="ShiftID" ColumnName="ShiftID" />
                 <ScalarProperty Name="WorkDate" ColumnName="WorkDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="mstLine_WorkTime">
+            <EntityTypeMapping TypeName="PlanEditModel.mstLine_WorkTime">
+              <MappingFragment StoreEntitySet="mstLine_WorkTime">
+                <ScalarProperty Name="WorkTime" ColumnName="WorkTime" />
+                <ScalarProperty Name="UpdateDate" ColumnName="UpdateDate" />
+                <ScalarProperty Name="UpdateUser" ColumnName="UpdateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="LineCode" ColumnName="LineCode" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

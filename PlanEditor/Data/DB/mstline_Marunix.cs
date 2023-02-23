@@ -39,5 +39,7 @@ namespace PlanEditor.Data.DB
         public Nullable<int> DefStaffQtyHD { get; set; }
         public Nullable<int> DefStaffQtyHN { get; set; }
         public Nullable<int> WorkQty { get; set; }
+        public Nullable<decimal> TargetD { get; set; }
+        public Nullable<decimal> TargetN { get; set; }
     }
 }

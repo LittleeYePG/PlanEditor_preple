@@ -48,7 +48,9 @@ namespace PlanEditor
         List<Data.cMRPCapacity> calMRPs = new List<Data.cMRPCapacity>();
         List<Data.cMRPCapacity> calCapacities = new List<Data.cMRPCapacity>();
         Funcion.clsCPlan cls = new Funcion.clsCPlan();
+        //Data.mmstOTDB GetOTDB = new Data.mmstOTDB();
         #endregion
+
         public clsVPlan()
         {
             InitializeComponent();
@@ -111,6 +113,8 @@ namespace PlanEditor
         }
 
         
+
+
         #region EvenForm
         void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -312,30 +316,30 @@ namespace PlanEditor
                 e.Cache.FillRectangle(hatchBrush, rec);
             if (calendarDB.HolidayFlag(1, cell.Interval.Start) == 1)
             {
-                e.Cache.FillRectangle(ColorTranslator.FromHtml("#FFCCCC"), rec);
+                e.Cache.FillRectangle(Funcion.FColor.HoliDay, rec);
             }
             else
-            {
-                //if (Convert.ToInt32(cell.Resource.CustomFields["ID"]) == 5
-                //    && cell.Interval.Start.Date == DateTime.Now.Date.AddDays(-1)
-                //        )
-                //{
-                //    e.Cache.FillRectangle(ColorTranslator.FromHtml("#229954"), rec);
-                //}
-                //else if (Convert.ToInt32(cell.Resource.CustomFields["ID"]) == 6
-                //    && cell.Interval.Start.Date == DateTime.Now.Date.AddDays(-1)
-                //        )
-                //{
-                //    e.Cache.FillRectangle(ColorTranslator.FromHtml("#FFFF00"), rec);
-                //}
-                //else
-                if (cell.Resource.Caption != "")
+            {                
+                if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0 &&
+                    Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
                 {
-                    e.Cache.FillRectangle(ColorTranslator.FromHtml("#FFFFCC"), rec);
+                    e.Cache.FillRectangle(Funcion.FColor.StopTimeOT, rec);
+                }
+                else if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0)
+                {
+                    e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
+                }
+                else if (Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+                {
+                    e.Cache.FillRectangle(Funcion.FColor.StopTime, rec);
+                }
+                else if (cell.Resource.Caption != "")
+                {
+                    e.Cache.FillRectangle(Funcion.FColor.LineMRP, rec);
                 }
                 else
                 {
-                    e.Cache.FillRectangle(ColorTranslator.FromHtml("#E1FFE1"), rec);
+                    e.Cache.FillRectangle(Funcion.FColor.LineSimulator, rec);
                 }
             }
 
@@ -408,69 +412,76 @@ namespace PlanEditor
         }
         private void SchedulerControl_MouseClick(object sender, MouseEventArgs e)
         {
-            //Point pos = new Point(e.X, e.Y);
-            //SchedulerViewInfoBase viewInfo = schedulerControl.ActiveView.ViewInfo;
-            //SchedulerHitInfo hitInfo = viewInfo.CalcHitInfo(pos, false);
 
-            //if (hitInfo.HitTest == SchedulerHitTest.AppointmentContent)
-            //{
-                
-            //    var DataList = Capacities.Union(calCapacities).ToList();
+            SchedulerControl scheduler = sender as SchedulerControl;
+            if (scheduler == null) return;
 
-            //    var app = ((DevExpress.XtraScheduler.Drawing.AppointmentViewInfo)hitInfo.ViewInfo).Appointment;
-            //    var data = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId)).FirstOrDefault();
+            Point pos = new Point(e.X, e.Y);
+            SchedulerViewInfoBase viewInfo = schedulerControl.ActiveView.ViewInfo;
+            SchedulerHitInfo hitInfo = viewInfo.CalcHitInfo(pos, false);
 
+            if (hitInfo.HitTest == SchedulerHitTest.Cell)
+            {
 
-            //    lblLine.Text = resources.Where(w => w.Id == Convert.ToInt32(hitInfo.ViewInfo.Resource.Id)).Select(s => s.LineName).FirstOrDefault();
-            //    lblPlanDate.Text = hitInfo.ViewInfo.Interval.Start.ToString("dd/MM/yyyy");
+                cDate = hitInfo.ViewInfo.Interval.Start;
+                cLineCode = Convert.ToInt32( hitInfo.ViewInfo.Resource.Id);
 
-            //    var DaysTime = Funcion.clsCFunction.WorkHours;
+                //    var DataList = Capacities.Union(calCapacities).ToList();
 
-            //    //var Capacity = data.MRPCapacity;
-            //    var Capacity = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId) && w.MDate.Equals(hitInfo.ViewInfo.Interval.Start)).Sum(s => s.TotalWorkTime);
-            //    lblWorktime.Text = Capacity.ToString("#,##0") + " / " + DaysTime.ToString("#,##0");
-            //    lblWorktime1.Text = "( " + Funcion.clsCFunction.InfoWorkingTime((int)Capacity) + " / " + Funcion.clsCFunction.InfoWorkingTime((int)DaysTime) + " )";
-
-            //    Capacity = (Capacity * 100) / (decimal)DaysTime;
-            //    if (Capacity == 0)
-            //    {
-            //        lblCapacityV.Text = "(Nomal)";
-            //        //lblCapacityV.Width = 100;
-            //        lblGreen.Width = 0;
-            //        lblRed.Width = 0;
-            //    }
-            //    else if (Capacity > 100)
-            //    {
-            //        lblCapacityV.Text = app.Subject + " (Over)";
-            //        //lblCapacityV.Width = 100;
-            //        lblGreen.Width = 100;
-            //        if (Capacity < 200)
-            //        {
-            //            lblRed.Width = (int)((decimal)(2.6) * (Capacity - 100));
-            //        }
-            //        else
-            //        {
-            //            lblRed.Width = 260;
-            //        }
-
-            //    }
-            //    else
-            //    {
-            //        lblCapacityV.Text = app.Subject + " (Normal)";
-            //        //lblCapacityV.Width = 100;
-            //        lblGreen.Width = (int)((decimal)(2.6) * Capacity);
-            //        lblRed.Width = 0;
-            //    }
+                //var app = ((DevExpress.XtraScheduler.Drawing.AppointmentViewInfo)hitInfo.ViewInfo).Appointment;
+                //var data = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId)).FirstOrDefault();
 
 
+                //    lblLine.Text = resources.Where(w => w.Id == Convert.ToInt32(hitInfo.ViewInfo.Resource.Id)).Select(s => s.LineName).FirstOrDefault();
+                //    lblPlanDate.Text = hitInfo.ViewInfo.Interval.Start.ToString("dd/MM/yyyy");
+
+                //    var DaysTime = Funcion.clsCFunction.WorkHours;
+
+                //    //var Capacity = data.MRPCapacity;
+                //    var Capacity = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId) && w.MDate.Equals(hitInfo.ViewInfo.Interval.Start)).Sum(s => s.TotalWorkTime);
+                //    lblWorktime.Text = Capacity.ToString("#,##0") + " / " + DaysTime.ToString("#,##0");
+                //    lblWorktime1.Text = "( " + Funcion.clsCFunction.InfoWorkingTime((int)Capacity) + " / " + Funcion.clsCFunction.InfoWorkingTime((int)DaysTime) + " )";
+
+                //    Capacity = (Capacity * 100) / (decimal)DaysTime;
+                //    if (Capacity == 0)
+                //    {
+                //        lblCapacityV.Text = "(Nomal)";
+                //        //lblCapacityV.Width = 100;
+                //        lblGreen.Width = 0;
+                //        lblRed.Width = 0;
+                //    }
+                //    else if (Capacity > 100)
+                //    {
+                //        lblCapacityV.Text = app.Subject + " (Over)";
+                //        //lblCapacityV.Width = 100;
+                //        lblGreen.Width = 100;
+                //        if (Capacity < 200)
+                //        {
+                //            lblRed.Width = (int)((decimal)(2.6) * (Capacity - 100));
+                //        }
+                //        else
+                //        {
+                //            lblRed.Width = 260;
+                //        }
+
+                //    }
+                //    else
+                //    {
+                //        lblCapacityV.Text = app.Subject + " (Normal)";
+                //        //lblCapacityV.Width = 100;
+                //        lblGreen.Width = (int)((decimal)(2.6) * Capacity);
+                //        lblRed.Width = 0;
+                //    }
 
 
 
-            //    #region Gride
-            //    gridControl1.DataSource = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId) && w.MDate.Equals(hitInfo.ViewInfo.Interval.Start)).ToList();
-            //    #endregion
-            //    //gDetail.Visible = true;
-            //}
+
+
+                //    #region Gride
+                //    gridControl1.DataSource = DataList.Where(w => w.ResourceID == Convert.ToInt32(app.ResourceId) && w.MDate.Equals(hitInfo.ViewInfo.Interval.Start)).ToList();
+                //    #endregion
+                //    //gDetail.Visible = true;
+            }
         }
         private void SchedulerControl_AppointmentFlyoutShowing(object sender, AppointmentFlyoutShowingEventArgs e)
         {
@@ -489,7 +500,8 @@ namespace PlanEditor
             lblLine.Text = resources.Where(w => w.Id == Convert.ToInt32(Apt.ResourceId)).Select(s => s.LineName).FirstOrDefault();
             lblPlanDate.Text = Apt.Start.ToString("dd/MM/yyyy");
 
-            var DaysTime = Funcion.clsCFunction.GetWorkHours(Apt.Start.Date);
+            var Linecode = resources.Where(w => w.Id == Convert.ToInt32(Apt.ResourceId)).Select(s => s.LineCode).FirstOrDefault();
+            var DaysTime = Funcion.clsCFunction.GetmstWorkTime_Minutes(Apt.Start.Date,Linecode);
 
             //var Capacity = data.MRPCapacity;
             var Capacity = DataList.Where(w => w.ResourceID == Convert.ToInt32(Apt.ResourceId) && w.MDate.Equals(Apt.Start)).Sum(s => s.TotalWorkTime);
@@ -629,6 +641,71 @@ namespace PlanEditor
             if (schedulerControl.SelectedAppointments.Count > 0)
             gDetail.Width = 415;
         }
+
+        private void bntSetting_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            using (clsVSetting frm = new clsVSetting())
+            {
+                Data.mmstOTDB OTDB = new Data.mmstOTDB();
+                foreach (var r in Funcion.clsCFunction.OTDB.GetMstOTs)
+                {
+                    OTDB.GetMstOTs.Add(r);
+                }
+                frm.SetOTDB = OTDB.GetMstOTs;
+                frm.LineID = cLineCode;
+                frm.LineCode = mstLineDB.getLineCode(cLineCode, resources);
+                frm.SetTempresources = resources;
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    Funcion.clsCFunction.OTDB.GetMstOTs = frm.GetOTDB;
+                    schedulerControl.Refresh();
+                }
+            }
+        }
+
+        private void btnLineWorkTime_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            using (FSetting.clsVLineWorkTime frm = new FSetting.clsVLineWorkTime())
+            {
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    schedulerControl.Refresh();
+                }
+            }
+        }
+        private void btnReLoad_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            reLoad();
+        }
         #endregion
+        #region SetOT
+        private DateTime cDate = new DateTime();
+        private int cLineCode =0;
+
+
+        #endregion
+
+        
+        private void reLoad()
+        {
+            IOverlaySplashScreenHandle handle = null;
+            try
+            {
+                handle = ShowProgressPanel();
+                ReloadData();
+                Funcion.clsCFunction.WorkTimes = null;
+                calCapacities.Clear();
+                calMRPs.Clear();
+
+                schedulerControl.DataStorage.Appointments.Clear();
+                schedulerControl.LimitInterval.Start = dtpDateFr.DateTime;
+                schedulerControl.LimitInterval.End = dtpDateTo.DateTime;
+                schedulerControl.Refresh();
+            }
+            finally
+            {
+                CloseProgressPanel(handle);
+            }
+        }
     }
 }
