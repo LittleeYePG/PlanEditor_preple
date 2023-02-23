@@ -79,40 +79,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsUFlyout.cs">
+    <Compile Include="uControl\clsUFlyout.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="clsUFlyout.Designer.cs">
+    <Compile Include="uControl\clsUFlyout.Designer.cs">
       <DependentUpon>clsUFlyout.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsUFlyoutPlan.cs">
+    <Compile Include="uControl\clsUFlyoutPlan.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="clsUFlyoutPlan.Designer.cs">
+    <Compile Include="uControl\clsUFlyoutPlan.Designer.cs">
       <DependentUpon>clsUFlyoutPlan.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVEdit.cs">
+    <Compile Include="Plan Edit\clsVEdit.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVEdit.Designer.cs">
+    <Compile Include="Plan Edit\clsVEdit.Designer.cs">
       <DependentUpon>clsVEdit.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVMerge.cs">
+    <Compile Include="Plan Edit\clsVMerge.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVMerge.Designer.cs">
+    <Compile Include="Plan Edit\clsVMerge.Designer.cs">
       <DependentUpon>clsVMerge.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVPlan.cs">
+    <Compile Include="Plan Home\clsVPlan.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVPlan.Designer.cs">
+    <Compile Include="Plan Home\clsVPlan.Designer.cs">
       <DependentUpon>clsVPlan.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVPlanEdit.cs">
+    <Compile Include="Plan Edit\clsVPlanEdit.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVPlanEdit.Designer.cs">
+    <Compile Include="Plan Edit\clsVPlanEdit.Designer.cs">
       <DependentUpon>clsVPlanEdit.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\DB\mstLine_WorkTime.cs">
@@ -148,16 +148,16 @@
     <Compile Include="FSetting\clsVSetting.Designer.cs">
       <DependentUpon>clsVSetting.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVShowInfomation.cs">
+    <Compile Include="Plan Edit\clsVShowInfomation.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVShowInfomation.Designer.cs">
+    <Compile Include="Plan Edit\clsVShowInfomation.Designer.cs">
       <DependentUpon>clsVShowInfomation.cs</DependentUpon>
     </Compile>
-    <Compile Include="clsVSplit.cs">
+    <Compile Include="Plan Edit\clsVSplit.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="clsVSplit.Designer.cs">
+    <Compile Include="Plan Edit\clsVSplit.Designer.cs">
       <DependentUpon>clsVSplit.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\cMRPCapacity.cs" />
@@ -230,10 +230,10 @@
     <Compile Include="Funcion\MyCustomScale.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SplashScreen1.cs">
+    <Compile Include="Plan Home\SplashScreen1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SplashScreen1.Designer.cs">
+    <Compile Include="Plan Home\SplashScreen1.Designer.cs">
       <DependentUpon>SplashScreen1.cs</DependentUpon>
     </Compile>
     <Compile Include="uControl\ucObject.cs">
@@ -248,22 +248,22 @@
     <Compile Include="uControl\ucScalTime.Designer.cs">
       <DependentUpon>ucScalTime.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="clsUFlyout.resx">
+    <EmbeddedResource Include="uControl\clsUFlyout.resx">
       <DependentUpon>clsUFlyout.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsUFlyoutPlan.resx">
+    <EmbeddedResource Include="uControl\clsUFlyoutPlan.resx">
       <DependentUpon>clsUFlyoutPlan.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVEdit.resx">
+    <EmbeddedResource Include="Plan Edit\clsVEdit.resx">
       <DependentUpon>clsVEdit.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVMerge.resx">
+    <EmbeddedResource Include="Plan Edit\clsVMerge.resx">
       <DependentUpon>clsVMerge.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVPlan.resx">
+    <EmbeddedResource Include="Plan Home\clsVPlan.resx">
       <DependentUpon>clsVPlan.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVPlanEdit.resx">
+    <EmbeddedResource Include="Plan Edit\clsVPlanEdit.resx">
       <DependentUpon>clsVPlanEdit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FSetting\clsVEditOT.resx">
@@ -281,10 +281,10 @@
     <EmbeddedResource Include="FSetting\clsVSetting.resx">
       <DependentUpon>clsVSetting.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVShowInfomation.resx">
+    <EmbeddedResource Include="Plan Edit\clsVShowInfomation.resx">
       <DependentUpon>clsVShowInfomation.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="clsVSplit.resx">
+    <EmbeddedResource Include="Plan Edit\clsVSplit.resx">
       <DependentUpon>clsVSplit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
@@ -298,7 +298,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SplashScreen1.resx">
+    <EmbeddedResource Include="Plan Home\SplashScreen1.resx">
       <DependentUpon>SplashScreen1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="uControl\ucObject.resx">
