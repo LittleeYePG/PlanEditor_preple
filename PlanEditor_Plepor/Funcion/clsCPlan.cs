@@ -1,4 +1,5 @@
 ﻿using DevExpress.XtraEditors;
+using PlanEditor_Plepor.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,6 +135,7 @@ namespace PlanEditor_Plepor.Funcion
         private List<Data.cMRPCapacity> calLoop(List<Data.cMRPCapacity> mRPCapacities, List<Data.cResource> resources,int dayDiff)
         {
             Data.mstLineDB lineDB = new Data.mstLineDB();
+            mstCalendarDB calendarDB = new Data.mstCalendarDB();
             using (Data.DB.PlanEditorEntities db = new Data.DB.PlanEditorEntities())
             {
                 dayDiff = dayDiff * -1;

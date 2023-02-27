@@ -233,6 +233,46 @@ namespace PlanEditor_Plepor.Data
                 return Funcion.clsCFunction.StartTime;
             }
         }
+        public TimeSpan GetMaxTime(DateTime date, string LineCode)
+        {
+            try
+            {
+                var result = GetMstOTs
+                    .Where(w => w.Date.Date.Equals(date.Date) && w.LineCode.Equals(LineCode))
+                    .OrderByDescending(o => o.etTime).FirstOrDefault();
+                if (result != null)
+                    if (result.etTime < Funcion.clsCFunction.EndTime)
+                        return Funcion.clsCFunction.EndTime;
+                    else
+                        return result.etTime;
+                else
+                    return Funcion.clsCFunction.EndTime;
+            }
+            catch
+            {
+                return Funcion.clsCFunction.EndTime;
+            }
+        }
+        public TimeSpan GetMinTime(DateTime date, string LineCode)
+        {
+            try
+            {
+                var result = GetMstOTs
+                    .Where(w => w.Date.Date.Equals(date.Date) && w.LineCode.Equals(LineCode))
+                    .OrderBy(o => o.stTime).FirstOrDefault();
+                if (result != null)
+                    if (Funcion.clsCFunction.StartTime < result.stTime)
+                        return Funcion.clsCFunction.StartTime;
+                    else
+                        return result.stTime;
+                else
+                    return Funcion.clsCFunction.StartTime;
+            }
+            catch
+            {
+                return Funcion.clsCFunction.StartTime;
+            }
+        }
         public bool checkTimeOT(DateTime date,int LineID)
         {
             try
@@ -274,6 +314,41 @@ namespace PlanEditor_Plepor.Data
             }
         }
 
+        public TimeSpan GetMaxTimeOT(DateTime date)
+        {
+            try
+            {
+                var result = GetMstOTs
+                    .Where(w => w.Date.Date.Equals(date.Date))
+                    .OrderByDescending(o => o.etTime).FirstOrDefault();
+                if (result != null)
+                    return result.etTime;
+                else
+                    return Funcion.clsCFunction.EndTime;
+            }
+            catch
+            {
+                return Funcion.clsCFunction.EndTime;
+            }
+        }
+        public TimeSpan GetMinTimeOT(DateTime date)
+        {
+            try
+            {
+                var result = GetMstOTs
+                    .Where(w => w.Date.Date.Equals(date.Date))
+                    .OrderBy(o => o.stTime).FirstOrDefault();
+                if (result != null)
+                    return result.stTime;
+                else
+                    return Funcion.clsCFunction.StartTime;
+            }
+            catch
+            {
+                return Funcion.clsCFunction.StartTime;
+            }
+        }
+
         /// <summary>
         /// เช็ค ว่า เป็นเวลาทำงานใช่หรือไม่
         /// </summary>
@@ -286,6 +361,26 @@ namespace PlanEditor_Plepor.Data
             {
                 var result = GetMstOTs
                    .Where(w => w.Date.Equals(date.Date) && w.LineCode.Equals(LineCode) && w.Type.Equals(2)
+                   && w.stTime <= date.TimeOfDay && w.etTime > date.TimeOfDay)
+                   .OrderByDescending(o => o.etTime).FirstOrDefault();
+                if (result != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public bool checkStopTime(DateTime date, string LineCode)
+        {
+            try
+            {
+                var result = GetMstOTs
+                   .Where(w => w.Date.Equals(date.Date) && w.LineCode.Equals(LineCode) && w.Type.Equals(1)
                    && w.stTime <= date.TimeOfDay && w.etTime > date.TimeOfDay)
                    .OrderByDescending(o => o.etTime).FirstOrDefault();
                 if (result != null)
@@ -348,6 +443,26 @@ namespace PlanEditor_Plepor.Data
             catch
             {
                 return 0;
+            }
+        }
+
+        public bool GetOTTimeDay(DateTime date)
+        {
+            try
+            {
+                if (GetMstOTs == null) return false;
+
+                var result = GetMstOTs
+                .Where(w => w.Date.Equals(date)  && w.Type.Equals(2))
+                .ToList();
+                if (result.Count > 0)
+                    return true;
+                else
+                    return false;
+            }
+            catch
+            {
+                return false;
             }
         }
 

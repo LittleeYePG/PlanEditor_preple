@@ -82,13 +82,15 @@ namespace PlanEditor_Plepor
             CMRPs = cMRPCapacities;
             rndCount = CMRPs.Count*2;
 
+            
+
             #region setschedulerControl
             schedulerControl.ActiveViewType = SchedulerViewType.Gantt;
             schedulerControl.GroupType = SchedulerGroupType.Resource;
             schedulerControl.DayView.Enabled = false;
 
-            //schedulerControl.LimitInterval.Start = dtpDateFr;
-            //schedulerControl.LimitInterval.End = dtpDateTo;
+            schedulerControl.LimitInterval.Start = dtpDateFr;
+            schedulerControl.LimitInterval.End = dtpDateTo;
             schedulerControl.GanttView.WorkTime.Start = Funcion.clsCFunction.GetStartTime;
             schedulerControl.GanttView.WorkTime.End = Funcion.clsCFunction.GetEndTime;
 
@@ -173,38 +175,90 @@ namespace PlanEditor_Plepor
                 //{
                 //    startWorkHours = startWorkHours;
                 //}
-                var LineCode = mstLineDB.getLineCode(Convert.ToInt32(cell.Resource.CustomFields["ID"]), resources);
                 Rectangle rec = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-                using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Color.White, Funcion.FColor.StopTimeOT))
-                {
-                    //if ((cell.Interval.Start.TimeOfDay < startWorkHours || cell.Interval.End.TimeOfDay > endWorkHours) || cell.Interval.End.TimeOfDay.Hours == 0)
-                    //{
 
-                    //    e.Cache.FillRectangle(hatchBrush, rec);
-                    //}
-                    if (!Funcion.clsCFunction.checkWorkTime(cell.Interval.Start, LineCode))
+                var LineCode = mstLineDB.getLineCode(Convert.ToInt32(cell.Resource.CustomFields["ID"]), resources);
+                if (LineCode == null)
+                {
+                    if (cell.Interval.Start.Day % 2 == 0)
                     {
-                        e.Cache.FillRectangle(hatchBrush, rec);
-                    }
-                    else if (Funcion.clsCFunction.OTDB.checkTimeOT(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
-                    {
-                        e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
-                    }
-                    else if (Funcion.clsCFunction.OTDB.checkStopTime(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
-                    {
-                        using (var hatchBrush1 = new HatchBrush(HatchStyle.DiagonalCross, Color.White, Funcion.FColor.StopTime))
-                        {
-                            e.Cache.FillRectangle(hatchBrush1, rec);
-                        }
-                            //e.Cache.FillRectangle(ColorTranslator.FromHtml("#FADBD8"), rec);
+                        e.Cache.FillRectangle(Funcion.FColor.LineMRP, rec);
                     }
                     else
                     {
-                        e.Cache.FillRectangle(ColorTranslator.FromHtml("#FFFFFF"), rec);
+                        e.Cache.FillRectangle(Funcion.FColor.LineSimulator, rec);
                     }
                 }
-                e.Cache.DrawRectangle(e.Bounds, System.Drawing.Color.LightGray, 1);
+                else
+                {                    
+                    using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Funcion.FColor.StopTimeOT, Color.White))
+                    {
+
+                        if ((cell.Interval.Start.TimeOfDay < startWorkHours || cell.Interval.End.TimeOfDay > endWorkHours)) //|| cell.Interval.End.TimeOfDay.Hours == 0
+                        {
+                            e.Cache.FillRectangle(hatchBrush, rec);
+                        }
+                        else if (!Funcion.clsCFunction.checkWorkTime(cell.Interval.Start, LineCode))
+                        {
+                            if (Funcion.clsCFunction.FindHoliday(cell.Interval.Start.Date))
+                            {
+                                // e.Cache.FillRectangle(Funcion.FColor.HoliDay, rec);
+                                using (var hatchBrush1 = new HatchBrush(HatchStyle.DiagonalCross, Funcion.FColor.HoliDay, Color.White))
+                                {
+                                    e.Cache.FillRectangle(hatchBrush1, rec);
+                                }
+                            }
+                            else
+                                e.Cache.FillRectangle(hatchBrush, rec);
+                        }
+                        else if (Funcion.clsCFunction.OTDB.checkTimeOT(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+                        {
+                            e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
+                        }
+                        else if (Funcion.clsCFunction.OTDB.checkStopTime(cell.Interval.Start, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+                        {
+                            //using (var hatchBrush1 = new HatchBrush(HatchStyle.DiagonalCross, Color.White, Funcion.FColor.StopTime))
+                            //{
+                            //    //      e.Cache.FillRectangle(hatchBrush1, rec);
+                            //}
+                            e.Cache.FillRectangle(ColorTranslator.FromHtml("#FADBD8"), rec);
+                        }
+                        else
+                        {
+                            //e.Cache.FillRectangle(ColorTranslator.FromHtml("#FFFFFF"), rec);
+                            e.DrawDefault();
+                        }
+                    }
+                }
+                //if (startWorkHours.Hours == cell.Interval.Start.Hour && cell.Interval.Start.Minute == 0)
+                //{
+                //    e.Cache.DrawRectangle(e.Bounds, System.Drawing.Color.Red, 1);
+                //}
+                //else
+                //{
+                    e.Cache.DrawRectangle(e.Bounds, System.Drawing.Color.LightGray, 1);
+                //}
+                
+                
                 e.Handled = true;
+            };
+            schedulerControl.CustomDrawDayHeader += (sender, e) =>
+            {
+                //DayHeader header = e.ObjectInfo as DayHeader;
+                //// Draws the outer rectangle.
+                //using (var backBrush = new LinearGradientBrush(e.Bounds,
+                //        Color.LightBlue, Color.Blue, LinearGradientMode.Vertical))
+                //    e.Cache.FillRectangle(backBrush, e.Bounds);
+                //Rectangle innerRect = Rectangle.Inflate(e.Bounds, -2, -2);
+                //// Draws the inner rectangle.
+                //using (var backBrush = new LinearGradientBrush(e.Bounds,
+                //        Color.Blue, Color.LightSkyBlue, LinearGradientMode.Vertical))
+                //    e.Cache.FillRectangle(backBrush, innerRect);
+                //// Draws the header's caption.
+                //e.Cache.DrawString(header.Caption, header.Appearance.HeaderCaption.Font,
+                //    Brushes.White, innerRect,
+                //    header.Appearance.HeaderCaption.GetStringFormat());
+                //e.Handled = true;
             };
             bntSave.ItemClick += BntSave_ItemClick;
 
@@ -926,6 +980,11 @@ namespace PlanEditor_Plepor
             }
         }
         #endregion
-        
+
+        private void bntShowHoliday_CheckedChanged(object sender, ItemClickEventArgs e)
+        {
+            Funcion.clsCFunction.ShowHoliday = bntShowHoliday.Checked;
+            schedulerControl.Refresh();
+        }
     }
 }

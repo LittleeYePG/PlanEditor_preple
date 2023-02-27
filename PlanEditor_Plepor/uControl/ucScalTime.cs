@@ -45,11 +45,32 @@ namespace PlanEditor_Plepor.uControl
                 uc.TextStart = string.Format("{0:D2}:{1:D2}", stTime.Hours, stTime.Minutes);
                 uc.TextEnd = string.Format("{0:D2}:{1:D2}", etTime.Hours, etTime.Minutes);
                 uc.TextDetail = uc.TextStart + " - " + uc.TextEnd;
+
+                //uc.Width = Convert.ToInt32(((etTime - stTime).TotalMinutes * GetScalMinutes));
                 
-                uc.Width = Convert.ToInt32(((etTime - stTime).TotalMinutes * GetScalMinutes));
+
+                if (uc.TextStart == "00:00")
+                {
+                    uc.Left = 1;
+                }
+                else
+                {
+                    uc.Left = (int)(stTime.TotalHours * psacl.Width);
+                }
+
+
+                if (uc.TextEnd == "23:59")
+                {
+                    uc.Width = (pDetail.Width - uc.Left) - 1;
+                }
+                else
+                {
+                    uc.Width = Convert.ToInt32(((etTime - stTime).TotalHours * psacl.Width));
+                }
+                
                 uc.Height = pDetail.Height - 2;
                 uc.Top = uc.Top + 1;
-                uc.Left = (int)(stTime.TotalMinutes * GetScalMinutes);
+                
                 uc.Visible = true;
 
                 uc.BringToFront();

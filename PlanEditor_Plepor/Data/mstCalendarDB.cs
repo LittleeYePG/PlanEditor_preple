@@ -36,5 +36,16 @@ namespace PlanEditor_Plepor.Data
                 }
             }
         }
+
+        public List<DB.mstcalendardetail> GetMstcalendardetails(decimal CalNo, DateTime date)
+        {
+            using (DB.PlanEditorEntities db = new DB.PlanEditorEntities())
+            {
+                var result = db.mstcalendardetails
+                    .Where(w => w.CalDate.Year == date.Date.Year || w.CalDate.Year == date.AddYears(-1).Year)
+                    .ToList();
+                return result;
+            }
+        }
     }
 }

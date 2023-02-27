@@ -1,4 +1,5 @@
 ﻿using DevExpress.XtraScheduler;
+using PlanEditor_Plepor.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace PlanEditor_Plepor
 {
     public class MyCustomScale : TimeScaleHour
     {
+        //private  mstCalendarDB calendarDB = new Data.mstCalendarDB();
         public MyCustomScale() { }
 
         public override string DisplayName { get => "Custom Work Hours"; set => base.DisplayName = value; }
@@ -21,23 +23,26 @@ namespace PlanEditor_Plepor
         }
         public override bool IsDateVisible(DateTime date)
         {
-            int ot = 0;
-            if (date.Date == DateTime.Today && date.Hour == 18)
-            {
-                ot = 0;
-            }
-
             TimeSpan Start = Funcion.clsCFunction.OTDB.GetMinTime(date); //Funcion.clsCFunction.StartTime;
-            //if (Funcion.clsCFunction.StartTime < Start)
-            //    Start = Funcion.clsCFunction.StartTime;
 
             TimeSpan End = Funcion.clsCFunction.OTDB.GetMaxTime(date);
-            //if (End < Funcion.clsCFunction.EndTime)
-            //    End = Funcion.clsCFunction.EndTime;
 
-            
+
+            if (!Funcion.clsCFunction.ShowHoliday)
+            {
+                if (Funcion.clsCFunction.FindHoliday(date.Date) && !Funcion.clsCFunction.CheckOTDay(date.Date))
+                {
+                    return false;
+                }
+                else if (Funcion.clsCFunction.FindHoliday(date.Date) && Funcion.clsCFunction.CheckOTDay(date.Date))
+                {
+                    Start = Funcion.clsCFunction.OTDB.GetMinTimeOT(date);
+                    End = Funcion.clsCFunction.OTDB.GetMaxTimeOT(date);
+                }
+            }
+
             if (date.Hour >= Start.Hours && date.Hour <= End.Hours)
-                return true;// !(date.Hour == 14);
+                return true;
             else return false;
         }
     }

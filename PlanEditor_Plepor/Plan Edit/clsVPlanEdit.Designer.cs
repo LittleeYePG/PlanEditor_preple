@@ -124,6 +124,8 @@ namespace PlanEditor_Plepor
             this.schedulerBarController1 = new DevExpress.XtraScheduler.UI.SchedulerBarController(this.components);
             this.lblToolTip = new System.Windows.Forms.Label();
             this.svgImageCollection1 = new DevExpress.Utils.SvgImageCollection(this.components);
+            this.bntShowHoliday = new DevExpress.XtraBars.BarCheckItem();
+            this.ribbonPageGroup2 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemDuration1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemSpinEdit1)).BeginInit();
@@ -188,9 +190,10 @@ namespace PlanEditor_Plepor
             this.switchCellsAutoHeightItem1,
             this.changeSnapToCellsUIItem1,
             this.bntSeparate,
-            this.bntMerge});
+            this.bntMerge,
+            this.bntShowHoliday});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 47;
+            this.ribbon.MaxItemId = 48;
             this.ribbon.Name = "ribbon";
             this.ribbon.PageCategories.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageCategory[] {
             this.calendarToolsRibbonPageCategory1});
@@ -204,6 +207,7 @@ namespace PlanEditor_Plepor
             // 
             // newAppointmentItem1
             // 
+            this.newAppointmentItem1.Caption = "New Job";
             this.newAppointmentItem1.Id = 1;
             this.newAppointmentItem1.Name = "newAppointmentItem1";
             // 
@@ -572,7 +576,8 @@ namespace PlanEditor_Plepor
             // 
             this.homeRibbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
             this.appointmentRibbonPageGroup1,
-            this.navigatorRibbonPageGroup1});
+            this.navigatorRibbonPageGroup1,
+            this.ribbonPageGroup2});
             this.homeRibbonPage1.Name = "homeRibbonPage1";
             // 
             // appointmentRibbonPageGroup1
@@ -935,6 +940,21 @@ namespace PlanEditor_Plepor
             this.svgImageCollection1.Add("grid", "image://svgimages/dashboards/grid.svg");
             this.svgImageCollection1.Add("columntotalsposition", "image://svgimages/dashboards/columntotalsposition.svg");
             // 
+            // bntShowHoliday
+            // 
+            this.bntShowHoliday.Caption = "Show Holiday";
+            this.bntShowHoliday.CheckBoxVisibility = DevExpress.XtraBars.CheckBoxVisibility.BeforeText;
+            this.bntShowHoliday.Id = 47;
+            this.bntShowHoliday.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("bntShowHoliday.ImageOptions.SvgImage")));
+            this.bntShowHoliday.Name = "bntShowHoliday";
+            this.bntShowHoliday.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.bntShowHoliday_CheckedChanged);
+            // 
+            // ribbonPageGroup2
+            // 
+            this.ribbonPageGroup2.ItemLinks.Add(this.bntShowHoliday);
+            this.ribbonPageGroup2.Name = "ribbonPageGroup2";
+            this.ribbonPageGroup2.Text = "View";
+            // 
             // clsVPlanEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1054,5 +1074,7 @@ namespace PlanEditor_Plepor
         private DevExpress.XtraBars.BarButtonItem bntSeparate;
         private DevExpress.XtraBars.BarButtonItem bntMerge;
         private DevExpress.Utils.SvgImageCollection svgImageCollection1;
+        private DevExpress.XtraBars.BarCheckItem bntShowHoliday;
+        private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup2;
     }
 }

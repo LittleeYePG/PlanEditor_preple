@@ -139,6 +139,7 @@
     <Compile Include="Data\DB\prgproductionresult.cs">
       <DependentUpon>PlanEditorModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Funcion\TimeCellGenerate.cs" />
     <Compile Include="uControl\clsUFlyout.cs">
       <SubType>UserControl</SubType>
     </Compile>

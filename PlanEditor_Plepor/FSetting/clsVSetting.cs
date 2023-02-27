@@ -154,7 +154,7 @@ namespace PlanEditor_Plepor
             //    endWorkHoursOT += TimeSpan.FromMinutes((double)Funcion.clsCFunction.GetOT);
 
             Rectangle rec = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-            using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Color.DimGray, Color.Azure))
+            using (var hatchBrush = new HatchBrush(HatchStyle.DiagonalCross, Funcion.FColor.StopTimeOT, Color.White))
             {
                 if (!Funcion.clsCFunction.checkWorkTime(cell.Interval.Start, LineCode))
                 {
@@ -166,7 +166,7 @@ namespace PlanEditor_Plepor
                 }
                 else if (cell.Interval.End.TimeOfDay > endWorkHours)
                 {
-                    e.Cache.FillRectangle(ColorTranslator.FromHtml("#FF0000"), rec);
+                  //  e.Cache.FillRectangle(ColorTranslator.FromHtml("#FF0000"), rec);
                 }
                 else
                 {

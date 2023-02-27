@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DevExpress.Schedule;
+using DevExpress.XtraScheduler;
+using PlanEditor_Plepor.Data;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
@@ -12,6 +15,7 @@ namespace PlanEditor_Plepor.Funcion
 {
     public static class clsCFunction
     {
+        public static bool ShowHoliday = false;
         public static bool getDataBaseConnect
         {
             get
@@ -141,7 +145,7 @@ namespace PlanEditor_Plepor.Funcion
 
         public static Data.mmstOTDB OTDB = new Data.mmstOTDB();
 
-
+        private static mstCalendarDB calendarDB = new Data.mstCalendarDB();
         private static List<Data.DB.mstLine_WorkTime> _WorkTimes = null;
         public static List<Data.DB.mstLine_WorkTime> WorkTimes
         {
@@ -188,6 +192,7 @@ namespace PlanEditor_Plepor.Funcion
         {
             try
             {
+                
                 if (!checkWorkTimeDB())
                 {
                     return false;
@@ -197,6 +202,11 @@ namespace PlanEditor_Plepor.Funcion
                             w.StartTime <= date.TimeOfDay &&
                             w.EndTime > date.TimeOfDay)
                     .ToList();
+
+                if (FindHoliday(date))
+                {
+                    result = new List<Data.DB.mstLine_WorkTime>();
+                }
                 if (result.Count > 0)
                 {
                     return true;
@@ -205,7 +215,7 @@ namespace PlanEditor_Plepor.Funcion
                 {
                     return OTDB.checkTimeOT(date, LineCode);
                 }
-                    return false;
+                   // return false;
             }
             catch
             {
@@ -228,16 +238,13 @@ namespace PlanEditor_Plepor.Funcion
                 }
                 var result = GetWorkTimeofDay(date, LineCode);
 
-                //aptnew.SetId((GetOTDB.GetMstOTs.Max(m => (int?)m.ID) ?? 0) + 1);
-                //var result = (WorkTimes
-                //    .Where(w => w.LineCode.Equals(LineCode))                    
-                //    ).ToList();
                 var m = 0.0;
                 foreach (var r in result)
                 {
                     m += ((TimeSpan)r.EndTime - (TimeSpan)r.StartTime).TotalMinutes;
                 }
-                //m += OTDB.GetOTTime(date, LineCode);
+
+
                 return m;
             }
             catch
@@ -359,12 +366,21 @@ namespace PlanEditor_Plepor.Funcion
         {
             try
             {
+                mstCalendarDB calendarDB = new Data.mstCalendarDB();
+
                 //List<Data.mmstOTDB> result = new List<Data.mmstOTDB>();
                 #region หาเวลาทำงานปัจจุบัน
                 var result = (WorkTimes
                     .Where(w => w.LineCode.Equals(_lineCode))
                     ).ToList();
+
+                if (calendarDB.HolidayFlag(1,_date) == 1)
+                {
+                    result = new List<Data.DB.mstLine_WorkTime>();
+                }
                 #endregion
+
+
 
                 #region หาเวลาทำงานโอที
                 foreach (var r in OTDB.GetMstOTs.Where(w=>w.Date == _date && w.LineCode == _lineCode && w.Type == 2))
@@ -442,9 +458,107 @@ namespace PlanEditor_Plepor.Funcion
                 return null;
             }
         }
+
+        // A collection of US Holidays for 2007.
+        public static bool GenerateHolidays(SchedulerControl scheduler, DateTime stDate,DateTime enDate, decimal CalNo)
+        {            
+            try
+            {
+                using (Data.DB.PlanEditorEntities db = new Data.DB.PlanEditorEntities())
+                {
+                    var result = db.mstcalendardetails
+                        .Where(w => w.CalDate >= stDate && w.CalDate <= enDate && w.HolidayFlag == 1 )
+                        .ToList();
+
+                    foreach (var h in result)
+                    {
+                        scheduler.WorkDays.Add(new Holiday(h.CalDate, "Holiday"));
+                    }
+                }
+                return true;
+            }catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        
+        public static bool CheckOTDay(DateTime date)
+        {
+            return OTDB.GetOTTimeDay(date.Date);
+        }
+
+        #region Holiday
+        private static List<Data.DB.mstcalendardetail> _Holiday = null;
+        public static List<Data.DB.mstcalendardetail> HolidayDB
+        {
+            get
+            {
+                return _Holiday;
+            }
+            set
+            {
+                _Holiday = value;
+            }
+        }
+        private static bool checkHolidayDB()
+        {
+            try
+            {
+                if (_Holiday == null)
+                {
+                    using (Data.DB.PlanEditorEntities db = new Data.DB.PlanEditorEntities())
+                    {
+                        DateTime st = DateTime.Today.AddMonths(-6);
+                        DateTime ed = DateTime.Today.AddMonths(6);
+                        _Holiday = db.mstcalendardetails
+                            .Where(w=>w.HolidayFlag == 1 
+                            && w.CalDate >= st
+                            && w.CalDate <= ed)
+                            .ToList();
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public static bool FindHoliday(SchedulerControl scheduler, DateTime date)
+        {
+            foreach (WorkDay item in scheduler.WorkDays)
+            {
+                if (item is Holiday)
+                {
+                    Holiday hol = (Holiday)item;
+                    if (hol.Date == date)
+                        return true;
+                }
+            }
+            return false;
+        }
+        public static bool FindHoliday(DateTime date)
+        {
+            if (checkHolidayDB())
+            {
+                var result = HolidayDB.Where(w=>w.CalDate.Equals(date.Date)).ToList();
+                if (result.Count > 0)
+                    return true;
+            }
+            return false;
+        }
+        #endregion
+
     }
     public static class FColor
     {
+        public static Color WorkTime
+        {
+            get
+            {
+                return Color.White;
+            }
+        }
         public static Color OTTime
         {
             get

@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraBars;
+﻿using DevExpress.Schedule;
+using DevExpress.XtraBars;
 using DevExpress.XtraGrid.Views.Card;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraScheduler.Drawing;
@@ -61,6 +62,7 @@ namespace PlanEditor_Plepor
 
             dtpDateFr.EditValue = System.DateTime.Today.AddDays(-2);
             dtpDateTo.EditValue = System.DateTime.Today.AddDays(7);
+            //Funcion.TimeCellGenerateDB.GenerateWorkTime();
 
             #region setschedulerControl
             schedulerControl.ActiveViewType = SchedulerViewType.Gantt;
@@ -101,7 +103,7 @@ namespace PlanEditor_Plepor
             schedulerControl.PopupMenuShowing += SchedulerControl_PopupMenuShowing;
             #endregion
 
-
+            //Funcion.clsCFunction.GenerateHolidays(schedulerControl, dtpDateFr.DateTime.AddMonths(-6), dtpDateFr.DateTime.AddMonths(6),1);
             resources = mstLineDB.GetResource_Demo();
             addAppointment();
 
@@ -112,7 +114,27 @@ namespace PlanEditor_Plepor
                 int r = e.RowHandle + 1;
                 e.CardCaption = "Row No "+ r;
             };
+
+            schedulerControl.CustomDrawDayHeader += (sender, e) =>
+            {
+                // Check whether the current object is a Day Header.
+                SchedulerHeader header = e.ObjectInfo as SchedulerHeader;
+                if (header != null)
+                {
+
+                    // Check whether the current date is a known holiday.
+                    //Holiday hol = FindHoliday(header.Interval.Start.Date);
+                    //if (Funcion.clsCFunction.FindHoliday(header.Interval.Start.Date))
+                    //{
+                    //    // Add the holiday name to the day header's caption.
+                    //    header.Caption = String.Format("{0} ({1})", "Holiday",
+                    //        header.Caption);
+                    //}
+                }
+            };
         }
+        // This method finds a holiday for the specified date.
+        
 
         private void SchedulerControl_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
         {
@@ -383,34 +405,38 @@ namespace PlanEditor_Plepor
             Rectangle rec = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
             using (var hatchBrush = new HatchBrush(HatchStyle.LightDownwardDiagonal, Color.LightYellow, Color.DodgerBlue))
                 e.Cache.FillRectangle(hatchBrush, rec);
-            if (calendarDB.HolidayFlag(1, cell.Interval.Start) == 1)
+            //if (calendarDB.HolidayFlag(1, cell.Interval.Start) == 1)
+            //{
+            //    e.Cache.FillRectangle(Funcion.FColor.HoliDay, rec);
+            //}
+            //else
+            //{                
+            if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0 &&
+                Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+            {
+                e.Cache.FillRectangle(Funcion.FColor.StopTimeOT, rec);
+            }
+            else if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0)
+            {
+                e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
+            }
+            else if (Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
+            {
+                e.Cache.FillRectangle(Funcion.FColor.StopTime, rec);
+            }
+            else if (Funcion.clsCFunction.FindHoliday(cell.Interval.Start.Date))//(calendarDB.HolidayFlag(1, cell.Interval.Start) == 1)
             {
                 e.Cache.FillRectangle(Funcion.FColor.HoliDay, rec);
             }
-            else
-            {                
-                if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0 &&
-                    Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
-                {
-                    e.Cache.FillRectangle(Funcion.FColor.StopTimeOT, rec);
-                }
-                else if (Funcion.clsCFunction.OTDB.GetOTTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])) > 0)
-                {
-                    e.Cache.FillRectangle(Funcion.FColor.OTTime, rec);
-                }
-                else if (Funcion.clsCFunction.OTDB.GetStopTime(cell.Interval.Start.Date, Convert.ToInt32(cell.Resource.CustomFields["ID"])))
-                {
-                    e.Cache.FillRectangle(Funcion.FColor.StopTime, rec);
-                }
-                else if (cell.Resource.Caption != "")
-                {
-                    e.Cache.FillRectangle(Funcion.FColor.LineMRP, rec);
-                }
-                else
-                {
-                    e.Cache.FillRectangle(Funcion.FColor.LineSimulator, rec);
-                }
+            else if (cell.Resource.Caption != "")
+            {
+                e.Cache.FillRectangle(Funcion.FColor.LineMRP, rec);
             }
+            else
+            {
+                e.Cache.FillRectangle(Funcion.FColor.LineSimulator, rec);
+            }
+            //}
 
             e.Cache.DrawRectangle(e.Bounds, System.Drawing.Color.LightGray, 1);
             aSize = e.Bounds.Height - 4;
@@ -635,6 +661,7 @@ namespace PlanEditor_Plepor
                 cMRPs = cls.calCMRPPercen(Capacities);
 
                 addApp();
+
                 schedulerControl.LimitInterval.Start = dtpDateFr.DateTime;
                 schedulerControl.LimitInterval.End = dtpDateTo.DateTime.AddDays(1);
                // addAppointment();
@@ -659,11 +686,16 @@ namespace PlanEditor_Plepor
                     calMRPs = cls.calCMRPPercen(calCapacities);
                     addApp();
 
+                    // dtpDateFr.EditValue = calMRPs.Select(s => s.MDate).DefaultIfEmpty(dtpDateFr.DateTime).Min();
+                    //dtpDateTo.EditValue = cMRPs.Select(s => s.MDate).DefaultIfEmpty(dtpDateTo.DateTime).Max();
+
                     DateTime sdate = calMRPs.OrderBy(o => o.MDate).Select(s => s.MDate).FirstOrDefault();
                     if (sdate < dtpDateFr.DateTime)
                     {
                         dtpDateFr.DateTime = sdate;
                         schedulerControl.LimitInterval.Start = dtpDateFr.DateTime;
+                        schedulerControl.LimitInterval.End = dtpDateTo.DateTime.AddDays(1);
+                        schedulerControl.Refresh();
                     }
                 }
             }
@@ -766,6 +798,8 @@ namespace PlanEditor_Plepor
             {
                 handle = ShowProgressPanel();
                 ReloadData();
+                //Funcion.TimeCellGenerateDB.TimeCells = null;
+                //Funcion.TimeCellGenerateDB.GenerateWorkTime();
                 Funcion.clsCFunction.WorkTimes = null;
                 calCapacities.Clear();
                 calMRPs.Clear();
